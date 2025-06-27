@@ -1,16 +1,15 @@
 package com.example.HealPoint.service;
 
-import com.example.HealPoint.entity.Role;
-import com.example.HealPoint.entity.User;
-import com.example.HealPoint.entity.UserRole;
+import com.example.HealPoint.entity.*;
+import com.example.HealPoint.enums.Status;
 import com.example.HealPoint.exceptions.DataValidationException;
 import com.example.HealPoint.mapper.RoleMapper;
+import com.example.HealPoint.mapper.SpecialistMapper;
 import com.example.HealPoint.mapper.UserMapper;
 import com.example.HealPoint.model.RoleModel;
+import com.example.HealPoint.model.SpecialistModel;
 import com.example.HealPoint.model.UserModel;
-import com.example.HealPoint.repository.RoleRepository;
-import com.example.HealPoint.repository.UserRepository;
-import com.example.HealPoint.repository.UserRoleRepository;
+import com.example.HealPoint.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,12 +34,47 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final SpecialistRepository specialistRepository;
+
+    private final UserSpecialistRepository userSpecialistRepository;
+
+    private final SpecialistMapper specialistMapper;
+
 
     public UserModel signUp(UserModel userModel) {
         User addUser = userMapper.userModelToUser(userModel);
         addUser.setPassword(passwordEncoder.encode(userModel.getPassword()));
         addUser = userRepository.save(addUser);
 
+
+        // Specialist
+        List<String> specialistIdsFromModel = userModel.getSpeciality().stream().map(s -> s.getSpecialistId()).toList();
+
+        List<Specialist> specialistInDb = specialistRepository.findAllBySpecialistIdIn(specialistIdsFromModel);
+
+        List<String> specialistIdsInDb = specialistInDb.stream().map(s -> s.getSpecialistId()).toList();
+        List<String> invalidSpecialists = new ArrayList<>();
+
+        for(String specialistId : specialistIdsFromModel){
+            if(!specialistIdsInDb.contains(specialistId)){
+                invalidSpecialists.add(specialistId);
+            }
+        }
+
+        if(!invalidSpecialists.isEmpty()){
+            throw new DataValidationException("Invalid Specialists : " + invalidSpecialists);
+        }
+
+        List<Specialist> saveSpecialists = specialistInDb.stream().filter(s -> specialistIdsFromModel.contains(s.getSpecialistId())).toList();
+
+        for(Specialist specialist : saveSpecialists){
+            UserSpecialist userSpecialist = new UserSpecialist();
+            userSpecialist.setUser(addUser);
+            userSpecialist.setSpecialist(specialist);
+            userSpecialistRepository.save(userSpecialist);
+        }
+
+        // Role
         List<String> roleIdsFromModel = userModel.getRoles().stream().map(r -> r.getRoleId()).toList();
 
         List<Role> roleInDb = roleRepository.findAllByRoleIdIn(roleIdsFromModel);
@@ -58,7 +92,7 @@ public class UserService {
             throw new DataValidationException("Invalid roles: " + invalidRoles);
         }
 
-        List<Role> saveRoles =roleInDb.stream().filter(r -> roleIdsFromModel.contains(r.getRoleId())).toList();
+        List<Role> saveRoles = roleInDb.stream().filter(r -> roleIdsFromModel.contains(r.getRoleId())).toList();
 
         for(Role role : saveRoles){
             UserRole userRole = new UserRole();
@@ -67,12 +101,21 @@ public class UserService {
             userRoleRepository.save(userRole);
         }
 
+
+        // Response
+
         UserModel userModelToReturn = userMapper.userToUserModel(addUser);
+
+        List<UserSpecialist> userSpecialist = userSpecialistRepository.findByUserUserId(addUser.getUserId());
+        List<SpecialistModel> specialistList = new ArrayList<>();
+        userSpecialist.forEach(us -> specialistList.add(userMapper.specialistToSpecialistModel(us.getSpecialist())));
+        userModelToReturn.setSpeciality(specialistList);
+
         List<UserRole> byUserUserId = userRoleRepository.findByUserUserId(addUser.getUserId());
         List<RoleModel> roleList = new ArrayList<>();
         byUserUserId.forEach(ur -> roleList.add(roleMapper.roleToRoleModel(ur.getRole())));
-
         userModelToReturn.setRoles(roleList);
+
         return userModelToReturn;
     }
 
@@ -81,6 +124,13 @@ public class UserService {
         List<User> usersList = userRepository.searchUsers(search);
         List<UserModel> userModelList = usersList.stream().map(user -> {
             UserModel userModel = userMapper.userToUserModel(user);
+            // Specialist List
+            List<UserSpecialist> userSpecialists = userSpecialistRepository.findByUserUserId(user.getUserId());
+            userSpecialists.stream()
+                    .filter(s -> s.getStatus() == Status.ACTIVE)
+                    .map(s -> specialistMapper.specialistToSpecialistModel(s.getSpecialist())).toList();
+
+            // User List
             List<UserRole> userRoles = userRoleRepository.findByUserUserId(user.getUserId());
             List<RoleModel> roleModelList = userRoles.stream().map(r -> roleMapper.roleToRoleModel(r.getRole())).toList();
             userModel.setRoles(roleModelList);
@@ -92,6 +142,7 @@ public class UserService {
 
     public String deleteUser(String email) {
         User byEmail = userRepository.findByEmail(email);
+
         userRepository.delete(byEmail);
         return "User deleted successfully";
     }
@@ -107,7 +158,52 @@ public class UserService {
         existingUser.setPassword(passwordEncoder.encode(userModel.getPassword()));
         User savedUser = userRepository.save(existingUser);
 
-        // Fetching Role Ids from incoming model
+        // User - Specialist
+        List<String> incomingSpecialistIdsFromModel = userModel.getSpeciality().stream()
+                .map(s -> s.getSpecialistId())
+                .distinct()
+                .toList();
+
+        // Fetch valid specialists from DB
+        List<Specialist> specialistInDb = specialistRepository.findAllBySpecialistIdIn(incomingSpecialistIdsFromModel);
+        List<String> specialistIdsInDb = specialistInDb.stream()
+                .map(Specialist -> Specialist.getSpecialistId())
+                .toList();
+
+        // detect invalid specialist IDs not present in DB
+        List<String> invalidSpecialistIds = incomingSpecialistIdsFromModel.stream()
+                .filter(id -> !specialistIdsInDb.contains(id))
+                .toList();
+        if (!invalidSpecialistIds.isEmpty()) {
+            throw new DataValidationException("Invalid Specialists: " + invalidSpecialistIds);
+        }
+
+        // Fetch existing UserSpecialists
+        List<UserSpecialist> existingUserSpecialists = userSpecialistRepository.findByUserUserId(savedUser.getUserId());
+
+        statusUpdate(incomingSpecialistIdsFromModel, existingUserSpecialists);
+
+        userSpecialistRepository.saveAll(existingUserSpecialists);
+
+        // Add new specialists if not already assigned
+        List<String> existingSpecialistIds = existingUserSpecialists.stream()
+                .map(u -> u.getSpecialist().getSpecialistId())
+                .toList();
+
+        List<Specialist> newSpecialistsToAdd = specialistInDb.stream()
+                .filter(s -> !existingSpecialistIds.contains(s.getSpecialistId()))
+                .toList();
+
+        for (Specialist specialist : newSpecialistsToAdd) {
+            UserSpecialist newUserSpecialist = new UserSpecialist();
+            newUserSpecialist.setUser(savedUser);
+            newUserSpecialist.setSpecialist(specialist);
+            newUserSpecialist.setStatus(Status.ACTIVE);
+            userSpecialistRepository.save(newUserSpecialist);
+        }
+
+
+        // User - Role
         List<String> incomingRoleIdsFromModel = userModel.getRoles().stream()
                 .map(u -> u.getRoleId())
                 .distinct()
@@ -169,9 +265,8 @@ public class UserService {
             userRoleRepository.save(updatedUserRole);
         }
 
-        // Map to UserModel for response
+        // Response
         UserModel updatedUserModel = userMapper.userToUserModel(savedUser);
-
         // Fetch updated roles using userId (not email)
         List<UserRole> updatedUserRoles = userRoleRepository.findByUserUserId(savedUser.getUserId());
         List<RoleModel> updatedRoleModels = updatedUserRoles.stream()
@@ -179,7 +274,29 @@ public class UserService {
                 .toList();
 
         updatedUserModel.setRoles(updatedRoleModels);
+
+        // Fetch updated Specialists using userId (not email)
+        List<UserSpecialist> updatedUserSpecialists = userSpecialistRepository.findByUserUserId(savedUser.getUserId());
+        List<SpecialistModel> updatedSpecialistModels = updatedUserSpecialists.stream()
+                .filter(s -> s.getStatus() == Status.ACTIVE)
+               .map(userSpecialist -> userMapper.specialistToSpecialistModel(userSpecialist.getSpecialist()))
+               .toList();
+        updatedUserModel.setSpeciality(updatedSpecialistModels);
+
         return updatedUserModel;
+    }
+
+
+    public void statusUpdate(List<String> incomingSpecialistIdsFromModel, List<UserSpecialist> existingSpecialistInDb) {
+        for (UserSpecialist userSpecialist : existingSpecialistInDb) {
+            String specialistId = userSpecialist.getSpecialist().getSpecialistId();
+            if (!incomingSpecialistIdsFromModel.contains(specialistId)) {
+                userSpecialist.setStatus(Status.INACTIVE);
+            }
+            else {
+                userSpecialist.setStatus(Status.ACTIVE);
+            }
+        }
     }
 
 }

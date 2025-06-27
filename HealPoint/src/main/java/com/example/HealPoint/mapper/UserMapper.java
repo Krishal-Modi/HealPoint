@@ -1,6 +1,8 @@
 package com.example.HealPoint.mapper;
 
+import com.example.HealPoint.entity.Specialist;
 import com.example.HealPoint.entity.User;
+import com.example.HealPoint.model.SpecialistModel;
 import com.example.HealPoint.model.UserModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -20,7 +22,6 @@ public interface UserMapper {
     @Mapping(target = "dateOfBirth", source = "dateOfBirth")
     @Mapping(target = "phoneNumber", source = "phoneNumber")
     @Mapping(target = "gender", source = "gender")
-    @Mapping(target = "specialist", source = "specialist")
     @Mapping(target = "address", source = "address")
     User userModelToUser(UserModel userModel);
 
@@ -32,11 +33,11 @@ public interface UserMapper {
     @Mapping(target = "dateOfBirth", source = "dateOfBirth")
     @Mapping(target = "phoneNumber", source = "phoneNumber")
     @Mapping(target = "gender", source = "gender")
-    @Mapping(target = "specialist", source = "specialist")
     @Mapping(target = "address", source = "address")
     UserModel userToUserModel(User user);
 
     User updateUserModel(UserModel userModel,@MappingTarget User existingUser);
 
 
+    SpecialistModel specialistToSpecialistModel(Specialist specialist);
 }
