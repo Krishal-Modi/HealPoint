@@ -48,6 +48,7 @@ HealPoint is a modern, RESTful backend application designed to streamline hospit
 - **Utilities**: Lombok, Apache Commons
 - **Build Tool**: Maven
 - **Validation**: Jakarta Validation API
+- **Tools**: Postman
 
 ## 📦 Prerequisites
 
