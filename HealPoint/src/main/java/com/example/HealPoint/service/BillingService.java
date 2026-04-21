@@ -33,6 +33,7 @@ public class BillingService {
 
     private final InventoryRepository inventoryRepository;
 
+    // Generate bill from cart, update inventory, and clear cart
     @Transactional
     public BillingModel generateBill(String email) {
 

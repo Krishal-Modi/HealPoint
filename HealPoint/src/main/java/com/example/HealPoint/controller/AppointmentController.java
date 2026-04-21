@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// Controller for appointment booking and management
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/appointment")
@@ -19,6 +20,7 @@ public class AppointmentController {
 
     private final JwtUtil jwtUtil;
 
+    // Book an appointment for a specific time slot
     @PostMapping("/bookAnAppointment")
     public ResponseEntity<AppointmentModel> bookAnAppointment(@RequestHeader("Authorization") String email,
                                                               @RequestParam String slotId) {

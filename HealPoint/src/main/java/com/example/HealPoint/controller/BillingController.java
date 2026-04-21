@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+// Controller for billing and order management
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/billing")
@@ -18,6 +19,7 @@ public class BillingController {
     private final JwtUtil jwtUtil;
 
 
+    // Generate bill from cart items and clear cart after checkout
     @PostMapping("/generateBill")
     public ResponseEntity<BillingModel> generateBill(@RequestHeader("Authorization") String tokenHeader){
         String authenticatedEmail = jwtUtil.extractUsername(tokenHeader);

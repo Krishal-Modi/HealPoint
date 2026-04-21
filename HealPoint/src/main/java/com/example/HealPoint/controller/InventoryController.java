@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// Controller for inventory/product management operations
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/inventory")
@@ -19,6 +20,7 @@ public class InventoryController {
 
     private final JwtUtil jwtUtil;
 
+    // Add new product to inventory
     @PostMapping("/addProduct")
     public ResponseEntity<InventoryModel> addProduct(@RequestHeader("Authorization") String tokenHeader,
                                                      @RequestBody InventoryModel inventoryModel){
@@ -33,6 +35,7 @@ public class InventoryController {
 //        return ResponseEntity.ok(inventoryService.getProducts(search));
 //    }
 
+    // Retrieve paginated list of all products
     @GetMapping("/getProduct")
     public ResponseEntity<Page<InventoryModel>> getProducts(
             @RequestParam(defaultValue = "1") int page,

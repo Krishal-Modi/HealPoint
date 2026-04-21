@@ -29,6 +29,7 @@ public class CartService {
 
     private final CartMapper cartMapper;
 
+    // Add inventory item to user's cart or update quantity
     public MessageModel addToCart(String email, String itemId, double quantity) {
 
         User user = userRepository.findByEmail(email);
@@ -62,6 +63,7 @@ public class CartService {
     }
 
 
+    // Remove specified quantity of item from cart
     public MessageModel removeFromCart(String email, String itemId, double quantity) {
 
         User user = userRepository.findByEmail(email);

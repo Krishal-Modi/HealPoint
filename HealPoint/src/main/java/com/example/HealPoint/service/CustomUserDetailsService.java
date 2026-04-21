@@ -27,6 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         this.userRoleRepository = userRoleRepository;
     }
 
+    // Load user details with roles for Spring Security authentication
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email);

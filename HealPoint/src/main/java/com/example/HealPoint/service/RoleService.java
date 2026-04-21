@@ -17,6 +17,7 @@ public class RoleService {
 
     private final RoleMapper roleMapper;
 
+    // Retrieve all roles available in the system
     public List<RoleModel> getRoles() {
 
         List<Role> allRoles = roleRepository.findAll();

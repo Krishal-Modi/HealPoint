@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// Controller for managing user operations like signup, login, and profile management
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
@@ -32,6 +33,7 @@ public class UserController {
 
     private final UserRoleRepository userRoleRepository;
 
+    // Register a new user with roles and specializations
     @PostMapping("/signup")
     public ResponseEntity<UserModel> signUp(@Valid @RequestBody UserModel userModel) {
         return ResponseEntity.ok(userService.signUp(userModel));
@@ -57,6 +59,7 @@ public class UserController {
         return ResponseEntity.ok(userService.updateProfile(authenticatedEmail, userModel));
     }
 
+    // Authenticate user and generate JWT token with roles
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserModel userModel) {
         try {

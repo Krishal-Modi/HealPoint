@@ -17,6 +17,7 @@ public class SpecialistService {
 
     private final SpecialistMapper specialistMapper;
 
+    // Get all specialists/specialties with optional search filter
     public List<SpecialistModel> getSpeciality(String search) {
         List<Specialist> all = specialistRepository.searchAll(search);
         return all.stream().map(speciality -> specialistMapper.specialistToSpecialistModel(speciality)).toList();

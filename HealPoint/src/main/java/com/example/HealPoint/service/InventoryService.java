@@ -19,6 +19,7 @@ public class InventoryService {
 
     private final InventoryMapper inventoryMapper;
     
+    // Create new inventory product entry
     public InventoryModel addProduct(InventoryModel inventoryModel) {
         Inventory inventory = inventoryMapper.inventoryModelToInventory(inventoryModel);
         inventory = inventoryRepository.save(inventory);

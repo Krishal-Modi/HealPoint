@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+// Controller for role information retrieval
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/role")
@@ -21,6 +22,7 @@ public class RoleController {
 
     private final RoleService roleService;
 
+    // Retrieve all available roles in the system
     @GetMapping("/getRoles")
     public ResponseEntity<List<RoleModel>> getRoles(@RequestHeader("Authorization") String tokenHeader){
         String authenticatedEmail = jwtUtil.extractUsername(tokenHeader);

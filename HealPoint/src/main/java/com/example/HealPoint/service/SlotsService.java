@@ -24,6 +24,7 @@ public class SlotsService {
     private final SlotsRepository slotsRepository;
 
 
+    // Create new appointment slot for specialist with available status
     public SlotsModel createSlot(SlotsModel slotsModel) {
         User user = userRepository.findById(slotsModel.getProviderId())
                 .orElseThrow(() -> new DataNotFoundException("User Not Found"));
@@ -46,6 +47,7 @@ public class SlotsService {
                 .map(slot -> slotMapper.slotsToSlotsModel(slot)).toList();
     }
 
+    // Delete appointment slot and return confirmation message
     public String deleteSlot(String slotId) {
         Slots slot = slotsRepository.findById(slotId)
                .orElseThrow(() -> new DataNotFoundException("Slot Not Found"));

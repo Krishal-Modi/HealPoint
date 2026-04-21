@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// Controller for retrieving specialist/specialization information
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/specialist")
@@ -18,6 +19,7 @@ public class SpecialistController {
 
     private final JwtUtil jwtUtil;
 
+    // Retrieve all available specialties with optional search filter
     @GetMapping("/getSpeciality")
     public ResponseEntity<List<SpecialistModel>> getSpeciality(@RequestParam(required = false) String search,
                                                                @RequestHeader("Authorization") String tokenHeader) {

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// Controller for appointment slot management
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/slots")
@@ -18,6 +19,7 @@ public class SlotsController {
 
     private final JwtUtil jwtUtil;
 
+    // Create a new appointment slot for a specialist
     @PostMapping("/createSlot")
     public ResponseEntity<SlotsModel> createSlot(@RequestHeader("Authorization") String tokenHeader,
                                                  @RequestBody SlotsModel slotsModel) {

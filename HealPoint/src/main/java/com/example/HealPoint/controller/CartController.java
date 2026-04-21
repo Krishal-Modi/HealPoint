@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+// Controller for shopping cart management
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/cartItems")
@@ -17,6 +18,7 @@ public class CartController {
 
     private final JwtUtil jwtUtil;
 
+    // Add or update inventory items in user's cart
     @PostMapping("/addToCart")
     public ResponseEntity<MessageModel> addProductToCart(@RequestHeader("Authorization") String tokenHeader,
                                                          @RequestParam String itemId,

@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+// Service for user registration, profile management, and role/specialist assignment
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -41,6 +42,7 @@ public class UserService {
     private final SpecialistMapper specialistMapper;
 
 
+    // Register new user with encrypted password and assign roles/specializations
     public UserModel signUp(UserModel userModel) {
         User addUser = userMapper.userModelToUser(userModel);
         addUser.setPassword(passwordEncoder.encode(userModel.getPassword()));

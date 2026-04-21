@@ -36,6 +36,7 @@ public class AppointmentService {
     private final AppointmentMapper appointmentMapper;
 
 
+    // Book appointment by assigning user to available slot
     public AppointmentModel bookAnAppointment(String email, String slotId) {
 
         User user = userRepository.findByEmail(email);
@@ -85,6 +86,7 @@ public class AppointmentService {
     }
 
 
+    // Retrieve all available slots grouped by provider and date
     public List<SlotBookingModel> getAllBookings(String userId) {
         List<Slots> slots;
 
