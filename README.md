@@ -235,10 +235,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 **Krishal Modi**
 - GitHub: [@Krishal-Modi](https://github.com/Krishal-Modi)
 
-## 📧 Contact
-
-For any queries or support, please open an issue in the GitHub repository.
-
----
-
-Made with ❤️ for better healthcare management
